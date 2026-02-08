@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Admin</title>
+  <style>
+    body { background:#000; color:#fff; font-family:Arial; max-width:500px; margin:20px auto; }
+    input, select, button { width:100%; margin:5px 0; padding:6px; }
+    h2 { margin-top:20px; }
+  </style>
+</head>
+<body>
+<h1>Admin</h1>
+
+<h2>Add Category</h2>
+<input id="catName" placeholder="Category name">
+<button onclick="addCategory()">Add Category</button>
+
+<h2>Add Link</h2>
+<select id="catSelect"></select>
+<input id="title" placeholder="Title (optional)">
+<input id="url" placeholder="https://...">
+<button onclick="addLink()">Add Link</button>
+
+<script>
+async function loadCats() {
+  const res = await fetch("links.json?t=" + Date.now());
+  const data = await res.json();
+  const sel = document.getElementById("catSelect");
+  sel.innerHTML = "";
+  data.categories.forEach(c => {
+    const o = document.createElement("option");
+    o.value = o.textContent = c.name;
+    sel.appendChild(o);
+  });
+}
+async function addCategory() {
+  const name = document.getElementById("catName").value.trim();
+  if (!name) return alert("Enter name");
+  await fetch("/add-category", {
+    method:"POST",
+    headers:{ "Content-Type":"application/json" },
+    body:JSON.stringify({ name })
+  });
+  document.getElementById("catName").value = "";
+  loadCats();
+}
+async function addLink() {
+  const category = document.getElementById("catSelect").value;
+  const title = document.getElementById("title").value.trim();
+  const url = document.getElementById("url").value.trim();
+  if (!url) return alert("Enter URL");
+  await fetch("/add-link", {
+    method:"POST",
+    headers:{ "Content-Type":"application/json" },
+    body:JSON.stringify({ category, title, url })
+  });
+  document.getElementById("title").value = "";
+  document.getElementById("url").value = "";
+}
+loadCats();
+</script>
+</body>
+</html>
